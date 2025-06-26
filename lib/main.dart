@@ -26,6 +26,18 @@ class QuizPage extends StatefulWidget {
 
 class _QuizPageState extends State<QuizPage> {
   List<Icon> scoreKeeper = [];
+  List<String> questions = [
+    "The capital of Australia is Sydney.",
+    "Lightning never strikes the same place twice.",
+    "The human body has four lungs.",
+    "Sharks are mammals.",
+    "The Great Wall of China is visible from space.",
+    "Bananas grow on trees.",
+    "Sound travels faster in water than in air.",
+    "Venus is the hottest planet in our solar system.",
+    "Albert Einstein failed math in school.",
+    "A group of crows is called a murder.",
+  ];
 
   @override
   Widget build(BuildContext context) {
