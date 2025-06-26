@@ -11,7 +11,62 @@ class Quizzler extends StatelessWidget {
         body: SafeArea(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 10.0),
-            child: QuizPage(),
+            child: StartPage(),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class StartPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey.shade900,
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.quiz, size: 100, color: Colors.white),
+              SizedBox(height: 30),
+              Text(
+                'Welcome to Quizzler!',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'OpenSans',
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Test your general knowledge by answering 10 true or false questions.',
+                style: TextStyle(color: Colors.white70, fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 40),
+              ElevatedButton.icon(
+                icon: Icon(Icons.play_arrow),
+                label: Text('Start Quiz', style: TextStyle(fontSize: 18)),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => QuizPage()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -24,9 +79,9 @@ class QuizPage extends StatefulWidget {
   _QuizPageState createState() => _QuizPageState();
 }
 
-int result = 0;
-
 class _QuizPageState extends State<QuizPage> {
+  int result = 0;
+  int questionNo = 0;
   List<Icon> scoreKeeper = [];
   List<String> questions = [
     "The capital of Australia is Sydney.",
@@ -41,7 +96,6 @@ class _QuizPageState extends State<QuizPage> {
     "A group of crows is called a murder.",
   ];
   List<int> answers = [2, 2, 2, 2, 2, 2, 1, 1, 2, 1];
-  int questionNo = 0;
   void generateAnswer(int btnNo, int answer) {
     if (btnNo == answer) {
       scoreKeeper.add(Icon(Icons.check, color: Colors.green));
@@ -52,7 +106,13 @@ class _QuizPageState extends State<QuizPage> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
+    if (questionNo >= questions.length) {
+      // Prevent further rendering and wait for navigation
+      return Container(); // Or show a loading spinner temporarily
+    }
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -74,6 +134,7 @@ class _QuizPageState extends State<QuizPage> {
             ),
           ),
         ),
+        // True Button
         Expanded(
           child: Padding(
             padding: EdgeInsets.all(15.0),
@@ -96,10 +157,21 @@ class _QuizPageState extends State<QuizPage> {
                 setState(() {
                   generateAnswer(1, answers[questionNo]);
                   questionNo++;
-                  if (questionNo == 10) {
+                  if (questionNo == questions.length) {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => ResultPage()),
+                      MaterialPageRoute(
+                        builder: (context) => ResultPage(
+                          result: result,
+                          onRestart: () {
+                            setState(() {
+                              result = 0;
+                              questionNo = 0;
+                              scoreKeeper = [];
+                            });
+                          },
+                        ),
+                      ),
                     );
                   }
                 });
@@ -107,6 +179,7 @@ class _QuizPageState extends State<QuizPage> {
             ),
           ),
         ),
+        // False Button
         Expanded(
           child: Padding(
             padding: EdgeInsets.all(15.0),
@@ -121,19 +194,29 @@ class _QuizPageState extends State<QuizPage> {
                 'False',
                 style: TextStyle(
                   color: Colors.white,
-                  fontFamily: 'OpenSans',
                   fontSize: 20.0,
+                  fontFamily: 'OpenSans',
                 ),
               ),
               onPressed: () {
-                //The user picked true.
                 setState(() {
                   generateAnswer(2, answers[questionNo]);
                   questionNo++;
-                  if (questionNo == 10) {
-                    Navigator.push(
+                  if (questionNo == questions.length) {
+                    Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => ResultPage()),
+                      MaterialPageRoute(
+                        builder: (context) => ResultPage(
+                          result: result,
+                          onRestart: () {
+                            setState(() {
+                              result = 0;
+                              questionNo = 0;
+                              scoreKeeper = [];
+                            });
+                          },
+                        ),
+                      ),
                     );
                   }
                 });
@@ -141,15 +224,19 @@ class _QuizPageState extends State<QuizPage> {
             ),
           ),
         ),
-
-        //TODO: Add a Row here as your score keeper
-        Row(children: scoreKeeper),
+        // Score Keeper
+        Center(child: Row(children: scoreKeeper)),
       ],
     );
   }
 }
 
 class ResultPage extends StatelessWidget {
+  final int result;
+  final VoidCallback onRestart;
+
+  ResultPage({required this.result, required this.onRestart});
+
   Widget goodOrBad() {
     if (result >= 5) {
       return Icon(Icons.emoji_emotions, color: Colors.green, size: 100);
@@ -196,8 +283,8 @@ class ResultPage extends StatelessWidget {
                 icon: Icon(Icons.refresh),
                 label: Text('Restart Quiz', style: TextStyle(fontSize: 18)),
                 onPressed: () {
-                  result = 0; // Reset score
-                  Navigator.pop(context); // Go back to QuizPage
+                  Navigator.pop(context);
+                  onRestart(); // Reset state in QuizPage
                 },
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(
