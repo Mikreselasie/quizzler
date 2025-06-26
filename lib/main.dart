@@ -38,6 +38,15 @@ class _QuizPageState extends State<QuizPage> {
     "Albert Einstein failed math in school.",
     "A group of crows is called a murder.",
   ];
+  List<int> answers = [2, 2, 2, 2, 2, 2, 1, 1, 2, 1];
+  int questionNo = 0;
+  void generateAnswer(int btnNo, int answer) {
+    if (btnNo == answer) {
+      scoreKeeper.add(Icon(Icons.check, color: Colors.green));
+    } else {
+      scoreKeeper.add(Icon(Icons.close, color: Colors.red));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +60,7 @@ class _QuizPageState extends State<QuizPage> {
             padding: EdgeInsets.all(10.0),
             child: Center(
               child: Text(
-                'This is where the question text will go.',
+                questions[questionNo],
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 25.0,
@@ -81,7 +90,10 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
-                setState(() {});
+                setState(() {
+                  generateAnswer(1, answers[questionNo]);
+                  questionNo++;
+                });
               },
             ),
           ),
@@ -106,6 +118,10 @@ class _QuizPageState extends State<QuizPage> {
               ),
               onPressed: () {
                 //The user picked true.
+                setState(() {
+                  generateAnswer(2, answers[questionNo]);
+                  questionNo++;
+                });
               },
             ),
           ),
