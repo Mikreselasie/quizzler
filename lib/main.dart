@@ -24,6 +24,8 @@ class QuizPage extends StatefulWidget {
   _QuizPageState createState() => _QuizPageState();
 }
 
+int result = 0;
+
 class _QuizPageState extends State<QuizPage> {
   List<Icon> scoreKeeper = [];
   List<String> questions = [
@@ -43,6 +45,7 @@ class _QuizPageState extends State<QuizPage> {
   void generateAnswer(int btnNo, int answer) {
     if (btnNo == answer) {
       scoreKeeper.add(Icon(Icons.check, color: Colors.green));
+      result++;
     } else {
       scoreKeeper.add(Icon(Icons.close, color: Colors.red));
     }
@@ -93,6 +96,12 @@ class _QuizPageState extends State<QuizPage> {
                 setState(() {
                   generateAnswer(1, answers[questionNo]);
                   questionNo++;
+                  if (questionNo == 10) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ResultPage()),
+                    );
+                  }
                 });
               },
             ),
@@ -121,6 +130,12 @@ class _QuizPageState extends State<QuizPage> {
                 setState(() {
                   generateAnswer(2, answers[questionNo]);
                   questionNo++;
+                  if (questionNo == 10) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ResultPage()),
+                    );
+                  }
                 });
               },
             ),
@@ -134,8 +149,71 @@ class _QuizPageState extends State<QuizPage> {
   }
 }
 
-/*
-question1: 'You can lead a cow down stairs but not up stairs.', false,
-question2: 'Approximately one quarter of human bones are in the feet.', true,
-question3: 'A slug\'s blood is green.', true,
-*/
+class ResultPage extends StatelessWidget {
+  Widget goodOrBad() {
+    if (result >= 5) {
+      return Icon(Icons.emoji_emotions, color: Colors.green, size: 100);
+    } else {
+      return Icon(Icons.sentiment_dissatisfied, color: Colors.red, size: 100);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey.shade900,
+      appBar: AppBar(
+        title: Text('Quiz Result'),
+        backgroundColor: Colors.black87,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              goodOrBad(),
+              SizedBox(height: 30),
+              Text(
+                'Your Score',
+                style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              SizedBox(height: 10),
+              Text(
+                '$result / 10',
+                style: TextStyle(
+                  fontSize: 50,
+                  fontWeight: FontWeight.bold,
+                  color: result >= 5 ? Colors.green : Colors.red,
+                ),
+              ),
+              SizedBox(height: 30),
+              ElevatedButton.icon(
+                icon: Icon(Icons.refresh),
+                label: Text('Restart Quiz', style: TextStyle(fontSize: 18)),
+                onPressed: () {
+                  result = 0; // Reset score
+                  Navigator.pop(context); // Go back to QuizPage
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 30.0,
+                    vertical: 15.0,
+                  ),
+                  backgroundColor: Colors.blue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
